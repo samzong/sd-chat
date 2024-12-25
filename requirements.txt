@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+diffusers
+torch
+Pillow
+gradio
+requests
+transformers 
