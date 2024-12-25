@@ -31,6 +31,14 @@ AVAILABLE_MODELS = {
     "Stable Diffusion XL": {
         "model_id": "stabilityai/stable-diffusion-xl-base-1.0",
         "pipeline_class": StableDiffusionXLPipeline
+    },
+    "Realistic Vision": {
+        "model_id": "SG161222/Realistic_Vision_V5.1_noVAE",
+        "pipeline_class": StableDiffusionPipeline
+    },
+    "Dreamshaper": {
+        "model_id": "Lykon/dreamshaper-8",
+        "pipeline_class": StableDiffusionPipeline
     }
 }
 
@@ -49,6 +57,22 @@ MODEL_CONFIGS = {
         "max_length": 77,
         "variant": "fp16",
         "use_safetensors": True
+    },
+    "Realistic Vision": {
+        "torch_dtype": torch.float32,
+        "requires_safety_checker": False,
+        "max_length": 77,
+        "variant": None,
+        "use_safetensors": True,
+        "custom_pipeline": None
+    },
+    "Dreamshaper": {
+        "torch_dtype": torch.float32,
+        "requires_safety_checker": False,
+        "max_length": 77,
+        "variant": None,
+        "use_safetensors": True,
+        "custom_pipeline": None
     }
 }
 
@@ -91,6 +115,13 @@ def get_pipe(model_name: str):
                     "use_safetensors": True,
                     "variant": "fp16"
                 })
+            else:
+                # 其他 SD 1.5 基础模型的通用配置
+                load_config.update({
+                    "safety_checker": None,
+                    "requires_safety_checker": False,
+                    "custom_pipeline": config.get("custom_pipeline", None)
+                })
             
             # 加载模型
             pipe = model_info["pipeline_class"].from_pretrained(
@@ -100,10 +131,31 @@ def get_pipe(model_name: str):
             
             logger.info("成功创建 pipeline")
             
-            # 使用 DPMSolverMultistepScheduler 以提高性能
+            # 配置调度器
             if model_name == "Stable Diffusion XL":
-                pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
-                logger.info("已更新 scheduler 为 DPMSolverMultistepScheduler")
+                pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+                    pipe.scheduler.config,
+                    algorithm_type="dpmsolver++",
+                    solver_order=2
+                )
+                logger.info("已更新 SDXL scheduler 为 DPMSolverMultistepScheduler")
+            elif model_name == "Realistic Vision":
+                # Realistic Vision 使用特定的调度器配置
+                pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+                    pipe.scheduler.config,
+                    algorithm_type="dpmsolver++",
+                    solver_order=2,
+                    use_karras_sigmas=True
+                )
+                logger.info("已更新 Realistic Vision scheduler 为优化的 DPMSolverMultistepScheduler")
+            else:
+                # 其他模型使用标准配置
+                pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+                    pipe.scheduler.config,
+                    algorithm_type="dpmsolver++",
+                    solver_order=2
+                )
+                logger.info("已更新 scheduler 为标准 DPMSolverMultistepScheduler")
             
             # 移动到 MPS 设备
             logger.info(f"正在将模型移动到 {DEVICE} 设备...")
