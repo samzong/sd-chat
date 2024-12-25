@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def get_available_models():
     try:
-        response = requests.get("http://localhost:8000/models")
+        response = requests.get("http://localhost:7858/models")
         models = response.json()["models"]
         logger.info(f"获取到可用模型: {models}")
         return models
@@ -21,7 +21,7 @@ def get_available_models():
 
 def get_available_video_models():
     try:
-        response = requests.get("http://localhost:8001/video_models")
+        response = requests.get("http://localhost:7859/video_models")
         models = response.json()["models"]
         logger.info(f"获取到可用视频模型: {models}")
         return models
@@ -37,7 +37,7 @@ def generate_image(model_name, prompt, negative_prompt, steps, cfg_scale, width,
         
         # 调用 API
         response = requests.post(
-            "http://localhost:8000/generate",
+            "http://localhost:7858/generate",
             json={
                 "model_name": model_name,
                 "prompt": prompt,
@@ -109,7 +109,7 @@ def generate_video(model_name, image, prompt, negative_prompt, width, height, nu
         
         # 调用 API
         response = requests.post(
-            "http://localhost:8001/generate_video",
+            "http://localhost:7859/generate_video",
             json=request_data
         )
         
