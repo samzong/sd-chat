@@ -1,7 +1,7 @@
 import torch
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from diffusers import StableDiffusionPipeline
+from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler, StableDiffusionXLPipeline
 from PIL import Image
 import io
 import base64
@@ -24,7 +24,32 @@ app = FastAPI()
 
 # 定义可用的模型列表
 AVAILABLE_MODELS = {
-    "Stable Diffusion 1.5": "runwayml/stable-diffusion-v1-5"
+    "Stable Diffusion 1.5": {
+        "model_id": "runwayml/stable-diffusion-v1-5",
+        "pipeline_class": StableDiffusionPipeline
+    },
+    "Stable Diffusion XL": {
+        "model_id": "stabilityai/stable-diffusion-xl-base-1.0",
+        "pipeline_class": StableDiffusionXLPipeline
+    }
+}
+
+# 模型特定配置
+MODEL_CONFIGS = {
+    "Stable Diffusion 1.5": {
+        "torch_dtype": torch.float32,
+        "requires_safety_checker": False,
+        "max_length": 77,
+        "variant": None,
+        "use_safetensors": True
+    },
+    "Stable Diffusion XL": {
+        "torch_dtype": torch.float32,
+        "requires_safety_checker": False,
+        "max_length": 77,
+        "variant": "fp16",
+        "use_safetensors": True
+    }
 }
 
 # 更新请求模型
@@ -43,19 +68,42 @@ model_cache = {}
 
 def get_pipe(model_name: str):
     if model_name not in model_cache:
-        model_id = AVAILABLE_MODELS[model_name]
+        model_info = AVAILABLE_MODELS[model_name]
+        config = MODEL_CONFIGS[model_name]
         try:
-            logger.info(f"开始加载模型: {model_name} ({model_id})")
+            logger.info(f"开始加载模型: {model_name} ({model_info['model_id']})")
             
             # 基础配置
-            pipe = StableDiffusionPipeline.from_pretrained(
-                model_id,
-                torch_dtype=torch.float32,
-                safety_checker=None,
-                requires_safety_checker=False
+            load_config = {
+                "torch_dtype": config["torch_dtype"],
+                "use_safetensors": config.get("use_safetensors", True),
+                "variant": config.get("variant", None)
+            }
+            
+            # 根据模型类型添加特定配置
+            if model_name == "Stable Diffusion 1.5":
+                load_config.update({
+                    "safety_checker": None,
+                    "requires_safety_checker": config["requires_safety_checker"]
+                })
+            elif model_name == "Stable Diffusion XL":
+                load_config.update({
+                    "use_safetensors": True,
+                    "variant": "fp16"
+                })
+            
+            # 加载模型
+            pipe = model_info["pipeline_class"].from_pretrained(
+                model_info["model_id"],
+                **load_config
             )
             
             logger.info("成功创建 pipeline")
+            
+            # 使用 DPMSolverMultistepScheduler 以提高性能
+            if model_name == "Stable Diffusion XL":
+                pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+                logger.info("已更新 scheduler 为 DPMSolverMultistepScheduler")
             
             # 移动到 MPS 设备
             logger.info(f"正在将模型移动到 {DEVICE} 设备...")
@@ -98,7 +146,8 @@ async def generate_image(request: PromptRequest):
             generator = torch.Generator(DEVICE).manual_seed(request.seed)
         
         # 处理 CLIP 输入限制
-        max_length = 77
+        config = MODEL_CONFIGS[request.model_name]
+        max_length = config["max_length"]
         prompt = request.prompt[:max_length]
         negative_prompt = request.negative_prompt[:max_length]
         
@@ -106,15 +155,28 @@ async def generate_image(request: PromptRequest):
         logger.info("开始生成图像...")
         try:
             with torch.inference_mode():
-                image = pipe(
-                    prompt=prompt,
-                    negative_prompt=negative_prompt,
-                    num_inference_steps=request.steps,
-                    guidance_scale=request.cfg_scale,
-                    width=request.width,
-                    height=request.height,
-                    generator=generator
-                ).images[0]
+                # 根据模型类型调用不同的生成方法
+                if request.model_name == "Stable Diffusion XL":
+                    image = pipe(
+                        prompt=prompt,
+                        negative_prompt=negative_prompt,
+                        num_inference_steps=request.steps,
+                        guidance_scale=request.cfg_scale,
+                        width=request.width,
+                        height=request.height,
+                        generator=generator
+                    ).images[0]
+                else:
+                    image = pipe(
+                        prompt=prompt,
+                        negative_prompt=negative_prompt,
+                        num_inference_steps=request.steps,
+                        guidance_scale=request.cfg_scale,
+                        width=request.width,
+                        height=request.height,
+                        generator=generator
+                    ).images[0]
+                    
         except Exception as e:
             logger.error(f"图像生成失败: {str(e)}")
             if request.model_name in model_cache:

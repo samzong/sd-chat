@@ -17,7 +17,7 @@ def get_available_models():
         return models
     except Exception as e:
         logger.error(f"获取模型列表失败: {str(e)}")
-        return ["Stable Diffusion 3.5"]  # 默认返回最新模型
+        return ["Stable Diffusion XL"]  # 默认返回最新模型
 
 def generate_image(model_name, prompt, negative_prompt, steps, cfg_scale, width, height, seed):
     try:
@@ -79,7 +79,7 @@ with gr.Blocks(title="Stable Diffusion WebUI", theme=gr.themes.Soft()) as demo:
         with gr.Column(scale=1):
             model_dropdown = gr.Dropdown(
                 choices=get_available_models(),
-                value="Stable Diffusion 3.5",
+                value="Stable Diffusion XL",
                 label="选择模型",
                 info="选择要使用的 AI 模型"
             )
@@ -147,9 +147,9 @@ with gr.Blocks(title="Stable Diffusion WebUI", theme=gr.themes.Soft()) as demo:
     # 添加示例
     gr.Examples(
         examples=[
-            ["Stable Diffusion 3.5", "a beautiful girl in white dress, high quality, best quality, extremely detailed", 
+            ["Stable Diffusion XL", "a beautiful girl in white dress, high quality, best quality, extremely detailed", 
              "ugly, bad quality", 30, 7.0, 512, 512, -1],
-            ["Stable Diffusion 3.5", "professional portrait photo of a young woman, photorealistic, 8k, detailed lighting", 
+            ["Stable Diffusion XL", "professional portrait photo of a young woman, photorealistic, 8k, detailed lighting", 
              "cartoon, anime, illustration", 30, 8.0, 512, 768, 42],
         ],
         inputs=[model_dropdown, prompt, negative_prompt, steps, cfg_scale, width, height, seed],
