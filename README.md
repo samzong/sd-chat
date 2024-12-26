@@ -4,6 +4,11 @@
 
 An AI creation platform based on Stable Diffusion, supporting both image and video generation. This project integrates multiple advanced AI models and provides a user-friendly web interface for creating high-quality AI-generated images and videos.
 
+## Demo
+
+![text-to-image](./img/text-to-image.png)
+![text-to-video](./img/text-to-video.png)
+
 ## Roadmap
 
 ### Completed Features ✅

@@ -4,6 +4,11 @@
 
 一个基于 Stable Diffusion 的 AI 创作平台，支持图像生成和视频生成功能。本项目集成了多个先进的 AI 模型，提供简单易用的 Web 界面，让用户可以轻松创作高质量的 AI 图像和视频。
 
+## 演示
+
+![text-to-image](./img/text-to-image.png)
+![text-to-video](./img/text-to-video.png)
+
 ## Roadmap
 
 ### 已完成功能 ✅
