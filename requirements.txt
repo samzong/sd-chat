@@ -1,26 +1,2 @@
-# 基础依赖
-torch>=2.0.0
-torchvision>=0.15.0
-diffusers>=0.25.0
-transformers>=4.36.0
-accelerate>=0.25.0
-
-# API 服务
-fastapi>=0.109.0
-uvicorn>=0.27.0
-python-multipart>=0.0.6
-
 # Web 界面
-gradio>=4.16.0
-
-# 图像处理
-Pillow>=10.0.0
-numpy>=1.24.0
-opencv-python>=4.8.0
-
-# 系统工具
-psutil>=5.9.0
-
-# 可选依赖
-safetensors>=0.4.0  # 更快的模型加载
-xformers>=0.0.22.post4  # 内存优化（仅 CUDA） 
+gradio>=4.44.1

@@ -110,7 +110,7 @@ cd sd-chat
 
 5. Install dependencies:
 ```bash
-pip install -r requirements.txt
+conda install -y environment.yml
 ```
 
 ### First Run
@@ -137,5 +137,3 @@ sd-chat/
 ## Contributing
 
 Issues and Pull Requests are welcome to help improve the project.
-
-[中文文档](README_zh.md)

@@ -9,6 +9,10 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# 在文件开头添加这两行
+# gr.close_all()
+# gr.Blocks(analytics_enabled=False)
+
 def get_available_models():
     try:
         response = requests.get("http://localhost:7858/models")
@@ -377,4 +381,4 @@ if __name__ == "__main__":
         server_port=7860,
         share=False,
         show_error=True
-    ) 
+    )

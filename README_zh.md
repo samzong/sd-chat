@@ -14,6 +14,7 @@
 ### 已完成功能 ✅
 
 #### 1. 文生图（Text-to-Image）
+- [x] Janus Pro 7B
 - [x] Stable Diffusion XL Base 1.0
 - [x] Stable Diffusion 1.5
 - [x] Realistic Vision V5.1
@@ -99,7 +100,7 @@ conda activate diffusers
 3. 安装 PyTorch（针对 MPS 加速）：
 ```bash
 # 安装支持 MPS 的 PyTorch
-conda install pytorch torchvision torchaudio -c pytorch-nightly
+conda install -y pytorch torchvision torchaudio -c pytorch-nightly
 ```
 
 4. 克隆项目：
@@ -110,7 +111,7 @@ cd sd-chat
 
 5. 安装依赖：
 ```bash
-pip install -r requirements.txt
+conda install -y environment.yml
 ```
 
 ### 首次运行

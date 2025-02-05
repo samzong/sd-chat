@@ -1,0 +1,24 @@
+name: diffusers
+channels:
+  - defaults
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+dependencies:
+  - python=3.10
+  - pytorch
+  - torchaudio
+  - torchvision
+  - xformers
+  - psutil
+  - accelerate
+  - diffusers
+  - transformers
+  - fastapi
+  - python-multipart
+  - uvicorn
+  - gradio
+  - openblas
+  - numpy
+  - opencv
+  - pillow
+prefix: /Users/x/miniconda3/envs/diffusers

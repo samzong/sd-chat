@@ -24,6 +24,10 @@ app = FastAPI()
 
 # 定义可用的模型列表
 AVAILABLE_MODELS = {
+    "Janus Pro": {
+        "model_id": "deepseek-ai/Janus-Pro-7B",
+        "pipeline_class": StableDiffusionPipeline
+    },
     "Stable Diffusion 1.5": {
         "model_id": "runwayml/stable-diffusion-v1-5",
         "pipeline_class": StableDiffusionPipeline
@@ -44,6 +48,13 @@ AVAILABLE_MODELS = {
 
 # 模型特定配置
 MODEL_CONFIGS = {
+    "Janus Pro": {
+        "torch_dtype": torch.float32,
+        "requires_safety_checker": False,
+        "max_length": 77,
+        "variant": None,
+        "use_safetensors": True
+    },
     "Stable Diffusion 1.5": {
         "torch_dtype": torch.float32,
         "requires_safety_checker": False,
